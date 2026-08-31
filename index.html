@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مَتن — عميلك يحرّر الصفحة الحقيقية</title>
+<meta name="description" content="نظام إدارة محتوى لغرف الأخبار المصممة يدويًا. العميل يحرّر نصوص صفحته الحقيقية وصورها، والتصميم يبقى مقفلًا.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap">
+<style>
+/* ————————————————————————————————————————————————
+   MATN landing. One deliberate theme: newsprint.
+   Print-emulating editorial, so light-only by design.
+   Radius system: all-sharp. Accent: proofreader red, locked.
+   ———————————————————————————————————————————————— */
+:root{
+  --paper:#f7f6f2;
+  --paper-2:#efeee8;
+  --ink:#131211;
+  --ink-2:#4c4a45;
+  --ink-3:#8a867e;
+  --rule:#dbd9d1;
+  --rule-2:#e8e6df;
+  --red:#c4392b;
+  --red-ink:#a92e22;
+  --red-dim:rgba(196,57,43,.08);
+  --red-mid:rgba(196,57,43,.35);
+  --band:#161514;
+  --band-ink:#f0eee9;
+  --band-mut:#94908a;
+
+  --disp:"Alexandria", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --body:"IBM Plex Sans Arabic", "Alexandria", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+
+  --gut:clamp(1.25rem, 4vw, 3rem);
+  --w:1280px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--body); font-weight:400;
+  font-size:16.5px; line-height:1.8;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:clip;
+}
+[dir="ltr"] body{ line-height:1.65 }
+.wrap{max-width:var(--w); margin-inline:auto; padding-inline:var(--gut)}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--red); outline-offset:3px}
+::selection{background:var(--red); color:#fff}
+
+/* ————— type ————— */
+h1,h2,h3{font-family:var(--disp); margin:0}
+.h-xxl{
+  font-weight:800; font-size:clamp(2.4rem, 6vw, 4.4rem);
+  line-height:1.26; letter-spacing:0; text-wrap:balance;
+}
+[dir="ltr"] .h-xxl{line-height:1.04; letter-spacing:-.035em; font-weight:700}
+.h-xl{
+  font-weight:800; font-size:clamp(1.9rem, 4.6vw, 3.2rem);
+  line-height:1.4; text-wrap:balance;
+}
+[dir="ltr"] .h-xl{line-height:1.12; letter-spacing:-.025em; font-weight:700}
+.h-l{font-weight:700; font-size:clamp(1.25rem, 2.6vw, 1.7rem); line-height:1.5}
+[dir="ltr"] .h-l{line-height:1.25; letter-spacing:-.015em}
+.mut{color:var(--ink-2)}
+.lede{font-size:clamp(1.02rem, 1.6vw, 1.2rem); color:var(--ink-2); max-width:62ch; text-wrap:pretty; font-weight:300}
+.mark{color:var(--red)}
+.mono{font-family:var(--mono); direction:ltr; unicode-bidi:isolate}
+
+/* ————— nav ————— */
+.nav{
+  position:sticky; top:0; z-index:50;
+  background:color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter:blur(10px);
+  border-block-end:1px solid var(--rule);
+}
+.nav-in{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:1rem; block-size:64px;
+}
+.brand{display:flex; align-items:center; gap:.7rem; text-decoration:none}
+.brand-mark{
+  inline-size:34px; block-size:34px; background:var(--ink); color:var(--paper);
+  display:grid; place-items:center;
+  font-family:var(--disp); font-weight:800; font-size:1.15rem; line-height:1;
+  padding-block-start:2px;
+}
+.brand b{font-family:var(--disp); font-weight:800; font-size:1.2rem}
+.nav-x{display:flex; align-items:center; gap:.6rem}
+.btn{
+  font-family:var(--body); font-weight:500; font-size:.85rem;
+  padding:.5rem 1.05rem; cursor:pointer; text-decoration:none;
+  border:1px solid var(--rule); background:transparent; color:var(--ink-2);
+  transition:border-color .18s, color .18s, background .18s, transform .12s;
+  display:inline-flex; align-items:center; gap:.45rem; white-space:nowrap;
+}
+.btn:hover{border-color:var(--ink); color:var(--ink)}
+.btn:active{transform:translateY(1px)}
+.btn-ink{background:var(--ink); border-color:var(--ink); color:var(--paper); font-size:.95rem; padding:.7rem 1.5rem}
+.btn-ink:hover{background:var(--red); border-color:var(--red); color:#fff}
+
+/* ————— hero ————— */
+.hero{padding-block:clamp(2.5rem, 6vw, 4.5rem) clamp(3rem, 7vw, 5.5rem)}
+.hero-g{display:grid; gap:clamp(2rem, 4.5vw, 4rem); grid-template-columns:minmax(0,1fr); align-items:center}
+@media(min-width:1024px){ .hero-g{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)} }
+/* No overflow mask here: connected Arabic script and its marks sit deeper
+   than the line box, and a clip reveal amputates them. Fade and rise instead. */
+.rl{display:block}
+.rl > span{display:block}
+.hero .lede{margin-block:1.4rem 2rem}
+.hero-cta{display:flex; align-items:center; gap:1rem; flex-wrap:wrap}
+.hero-hint{font-size:.82rem; color:var(--ink-3)}
+
+/* the live proof: a real editable page fragment */
+.proof{
+  background:#fffefb; border:1px solid var(--rule);
+  box-shadow:0 1px 2px rgba(19,18,17,.04), 0 24px 48px -24px rgba(19,18,17,.18);
+  min-inline-size:0;
+}
+.proof-bar{
+  display:flex; align-items:center; gap:.5rem;
+  padding:.6rem .9rem; border-block-end:1px solid var(--rule-2); background:var(--paper);
+}
+.proof-bar i{inline-size:8px; block-size:8px; border-radius:50%; background:var(--rule); flex:none}
+.proof-bar code{
+  font-family:var(--mono); font-size:.66rem; color:var(--ink-3);
+  margin-inline-start:.4rem; direction:ltr; unicode-bidi:isolate;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.proof-body{padding:clamp(1.1rem, 2.6vw, 1.6rem)}
+.kick{
+  font-family:var(--body); font-weight:600; font-size:.74rem;
+  color:var(--red); margin:0 0 .5rem; letter-spacing:.02em;
+}
+[dir="ltr"] .kick{font-family:var(--mono); font-weight:500; text-transform:uppercase; letter-spacing:.14em; font-size:.64rem}
+.proof h3{font-weight:700; font-size:clamp(1.3rem, 2.8vw, 1.7rem); line-height:1.5; margin:0 0 .8rem}
+[dir="ltr"] .proof h3{line-height:1.2; letter-spacing:-.015em}
+.proof-img{position:relative; margin:0 0 .9rem}
+.proof-img img{display:block; inline-size:100%; block-size:170px; object-fit:cover; filter:saturate(.88)}
+.proof p.sf{margin:0; color:var(--ink-2); font-size:.93rem}
+.proof-ft{
+  display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+  margin-block-start:1.1rem; padding-block-start:.9rem; border-block-start:1px dashed var(--rule);
+  font-size:.78rem; color:var(--ink-3);
+}
+.lockline{display:inline-flex; align-items:center; gap:.45rem}
+.lockline svg{inline-size:12px; block-size:12px; flex:none}
+.saved{color:var(--red); font-weight:500; opacity:0; transition:opacity .25s}
+.saved.on{opacity:1}
+
+.region{position:relative; cursor:text; transition:background .15s, box-shadow .15s; outline:none}
+.region::after{
+  content:attr(data-hint);
+  position:absolute; inset-block-end:calc(100% + 6px); inset-inline-start:0;
+  font-family:var(--body); font-weight:500; font-size:.68rem;
+  color:#fff; background:var(--red); padding:.14rem .5rem;
+  opacity:0; transform:translateY(4px); transition:opacity .15s, transform .15s;
+  pointer-events:none; white-space:nowrap; z-index:2;
+}
+.region:hover,.region:focus{background:var(--red-dim); box-shadow:0 0 0 1.5px var(--red-mid)}
+.region:focus{box-shadow:0 0 0 2px var(--red)}
+.region:hover::after,.region:focus::after{opacity:1; transform:translateY(0)}
+.region-img::after{inset-block-end:auto; inset-block-start:.5rem; inset-inline-start:.5rem}
+.region-img:hover img{filter:saturate(.88) brightness(.92)}
+.region-img:hover{box-shadow:inset 0 0 0 2px var(--red)}
+
+/* ————— ink band (the one color-block moment) ————— */
+.band{background:var(--band); color:var(--band-ink); padding-block:clamp(4rem, 9vw, 7rem)}
+.band .h-xl{max-width:20ch}
+.band p{color:var(--band-mut); max-width:58ch; font-weight:300; font-size:1.05rem; margin:1.2rem 0 0}
+.band .mark{color:#e8564a}
+
+/* ————— scrolltelling: open, click, saved ————— */
+.how{padding-block:clamp(4rem, 8vw, 6.5rem)}
+.how-head{max-width:34ch; margin-block-end:clamp(2.5rem, 5vw, 4rem)}
+.how-g{display:grid; gap:clamp(2rem, 5vw, 5rem); grid-template-columns:minmax(0,1fr)}
+@media(min-width:1024px){ .how-g{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)} }
+.steps{display:flex; flex-direction:column; gap:clamp(2.5rem, 6vh, 4rem)}
+@media(min-width:1024px){ .steps .step{min-block-size:52vh; display:flex; flex-direction:column; justify-content:center} }
+.step{border-inline-start:2px solid var(--rule); padding-inline-start:1.4rem; transition:border-color .3s}
+.step.on{border-color:var(--red)}
+.step .n{
+  font-family:var(--mono); font-size:.72rem; color:var(--ink-3);
+  display:block; margin-block-end:.5rem; direction:ltr; unicode-bidi:isolate;
+}
+.step.on .n{color:var(--red)}
+.step h3{font-weight:700; font-size:clamp(1.3rem, 2.6vw, 1.8rem); line-height:1.45; margin:0 0 .5rem; color:var(--ink-3); transition:color .3s}
+[dir="ltr"] .step h3{line-height:1.2}
+.step.on h3{color:var(--ink)}
+.step p{margin:0; color:var(--ink-2); max-width:44ch; font-size:.98rem}
+.how-vis{position:relative}
+@media(min-width:1024px){ .how-vis-in{position:sticky; top:calc(50vh - 220px)} }
+
+/* stage states, driven by scroll */
+.stage .region-sim{position:relative; transition:box-shadow .35s, background .35s}
+.stage[data-s="0"] .region-sim{box-shadow:0 0 0 1.5px var(--red-mid); background:var(--red-dim)}
+.stage[data-s="1"] .rs-head{box-shadow:0 0 0 2px var(--red); background:var(--red-dim)}
+.caret{
+  display:none; inline-size:2px; block-size:1.15em; background:var(--red);
+  vertical-align:text-bottom; margin-inline-start:2px;
+}
+.stage[data-s="1"] .caret{display:inline-block; animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.stage .savedchip{
+  position:absolute; inset-block-start:.65rem; inset-inline-end:.9rem;
+  font-size:.74rem; font-weight:500; color:#fff; background:var(--red);
+  padding:.18rem .6rem; opacity:0; transform:translateY(-4px);
+  transition:opacity .35s, transform .35s;
+}
+.stage[data-s="2"] .savedchip{opacity:1; transform:translateY(0)}
+.stage[data-s="2"] .region-sim{box-shadow:none; background:transparent}
+
+/* ————— bento ————— */
+.why{padding-block:clamp(4rem, 8vw, 6.5rem); background:var(--paper-2)}
+.why-head{max-width:38ch; margin-block-end:clamp(2rem, 4vw, 3rem)}
+.bento{display:grid; gap:1px; background:var(--rule); border:1px solid var(--rule)}
+@media(min-width:760px){ .bento{grid-template-columns:repeat(2, minmax(0,1fr))} }
+@media(min-width:1100px){
+  .bento{grid-template-columns:repeat(3, minmax(0,1fr))}
+  .cell-w{grid-column:span 2}
+}
+.cell{background:var(--paper); padding:clamp(1.4rem, 3vw, 2rem); min-inline-size:0}
+.cell h3{font-weight:700; font-size:1.12rem; line-height:1.5; margin:0 0 .55rem}
+[dir="ltr"] .cell h3{line-height:1.25}
+.cell p{margin:0; font-size:.94rem; color:var(--ink-2)}
+.cell-red{background:var(--red); }
+.cell-red h3,.cell-red p{color:#fff}
+.cell-red p{opacity:.85}
+.cell-ink{background:var(--band)}
+.cell-ink h3{color:var(--band-ink)}
+.cell-ink p{color:var(--band-mut)}
+.cell .big{
+  font-family:var(--disp); font-weight:800; font-size:clamp(2.2rem, 4vw, 3rem);
+  line-height:1.15; display:block; margin-block-end:.6rem; color:inherit;
+}
+.cell-red .big{color:#fff}
+
+/* ————— foundations ————— */
+.base{padding-block:clamp(4rem, 8vw, 6.5rem)}
+.base-g{display:grid; gap:clamp(1.5rem, 3vw, 2.5rem); grid-template-columns:minmax(0,1fr); margin-block-start:clamp(2rem, 4vw, 3rem)}
+@media(min-width:900px){ .base-g{grid-template-columns:repeat(3, minmax(0,1fr))} }
+.pillar{border-block-start:2px solid var(--ink); padding-block-start:1.2rem}
+.pillar h3{font-weight:700; font-size:1.05rem; margin:0 0 .9rem}
+.pillar ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:.7rem}
+.pillar li{font-size:.93rem; color:var(--ink-2); padding-inline-start:1rem; position:relative}
+.pillar li::before{content:""; position:absolute; inset-inline-start:0; inset-block-start:.65em; inline-size:.45rem; block-size:2px; background:var(--red)}
+.pillar li b{color:var(--ink); font-weight:600}
+
+/* ————— author ————— */
+.who{border-block-start:1px solid var(--rule); padding-block:clamp(3.5rem, 7vw, 5.5rem)}
+.who-g{display:grid; gap:clamp(1.5rem, 4vw, 4rem); grid-template-columns:minmax(0,1fr)}
+@media(min-width:900px){ .who-g{grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr)} }
+.who p{margin:0 0 1rem; color:var(--ink-2); max-width:60ch}
+.who-links{display:flex; gap:.6rem; flex-wrap:wrap; margin-block-start:1.6rem}
+
+/* ————— footer ————— */
+footer{border-block-start:1px solid var(--rule); padding-block:1.5rem 2.5rem}
+.ft{display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; font-size:.8rem; color:var(--ink-3)}
+
+/* ————— motion primitives ————— */
+.fx{opacity:0; transform:translateY(28px)}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .fx{opacity:1 !important; transform:none !important}
+  *{animation:none !important; transition:none !important}
+  .stage .savedchip{opacity:1; transform:none}
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="#" aria-label="MATN">
+      <span class="brand-mark">م</span>
+      <b data-en="MATN" data-ar="مَتن">مَتن</b>
+    </a>
+    <nav class="nav-x">
+      <a class="btn" href="https://github.com/imsemoo">GitHub</a>
+      <button class="btn" id="lang" type="button">EN</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- HERO: asymmetric split, live proof on the other side -->
+  <section class="hero">
+    <div class="wrap hero-g">
+      <div>
+        <h1 class="h-xxl" id="hh">
+          <span class="rl"><span data-en="Your client edits" data-ar="عميلك يحرّر">عميلك يحرّر</span></span>
+          <span class="rl"><span data-en="the &lt;em class='mark' style='font-style:normal'&gt;real page&lt;/em&gt;." data-ar="&lt;em class='mark' style='font-style:normal'&gt;الصفحة الحقيقية&lt;/em&gt;.">‏<em class="mark" style="font-style:normal">الصفحة الحقيقية</em>.</span></span>
+          <span class="rl"><span data-en="The design stays locked." data-ar="والتصميم يبقى مقفلًا.">والتصميم يبقى مقفلًا.</span></span>
+        </h1>
+        <p class="lede fx" data-en="No page builder, no drag and drop. The editor clicks a headline to rewrite it, swaps a photo in place, and cannot break the design." data-ar="لا مُنشئ صفحات ولا سحب وإفلات. ينقر المحرر العنوان فيعيد كتابته، ويبدّل الصورة في موضعها، ولا يستطيع كسر التصميم.">لا مُنشئ صفحات ولا سحب وإفلات. ينقر المحرر العنوان فيعيد كتابته، ويبدّل الصورة في موضعها، ولا يستطيع كسر التصميم.</p>
+        <div class="hero-cta fx">
+          <button class="btn btn-ink" id="try" type="button" data-en="Edit the headline yourself" data-ar="حرّر العنوان بنفسك">حرّر العنوان بنفسك</button>
+          <span class="hero-hint" data-en="It works. Right here." data-ar="يعمل فعلًا. هنا.">يعمل فعلًا. هنا.</span>
+        </div>
+      </div>
+
+      <div class="proof fx" id="proof">
+        <div class="proof-bar">
+          <i></i><i></i><i></i>
+          <code>alqahera-times.com/news/metro-line-four</code>
+        </div>
+        <div class="proof-body">
+          <p class="kick" data-en="Transport" data-ar="النقل">النقل</p>
+          <h3>
+            <span class="region" id="r1" contenteditable="true" spellcheck="false"
+              data-hint-ar="عنوان" data-hint-en="Heading"
+              data-en="Line four opens three stations early"
+              data-ar="الخط الرابع يفتتح ثلاث محطات قبل الموعد">الخط الرابع يفتتح ثلاث محطات قبل الموعد</span>
+          </h3>
+          <figure class="proof-img region region-img" data-hint-ar="صورة" data-hint-en="Image" tabindex="0" style="margin-inline:0">
+            <img src="assets/metro.jpg" alt="" width="900" height="380" loading="eager">
+          </figure>
+          <p class="sf">
+            <span class="region" id="r2" contenteditable="true" spellcheck="false"
+              data-hint-ar="مقدمة" data-hint-en="Standfirst"
+              data-en="Services begin at six on Sunday, four months ahead of the published timetable."
+              data-ar="تبدأ الخدمة في السادسة صباح الأحد، قبل الجدول المعلن بأربعة أشهر.">تبدأ الخدمة في السادسة صباح الأحد، قبل الجدول المعلن بأربعة أشهر.</span>
+          </p>
+          <div class="proof-ft">
+            <span class="lockline">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3.2" y="7" width="9.6" height="7" rx="0"/><path d="M5.6 7V4.9a2.4 2.4 0 0 1 4.8 0V7"/></svg>
+              <span data-en="Layout, type and colour: not editable" data-ar="التخطيط والخط واللون: خارج التحرير">التخطيط والخط واللون: خارج التحرير</span>
+            </span>
+            <span class="saved" id="saved" data-en="Saved" data-ar="تم الحفظ">تم الحفظ</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INK BAND: the argument, once -->
+  <section class="band">
+    <div class="wrap">
+      <h2 class="h-xl fx"
+        data-en="Twenty years of the same trade-off: hand over a page builder and lose the design, or lock it and answer every email."
+        data-ar="عشرون عامًا والمقايضة واحدة: سلّم مُنشئ الصفحات فتخسر التصميم، أو أقفله فتردّ على كل بريد.">عشرون عامًا والمقايضة واحدة: سلّم مُنشئ الصفحات فتخسر التصميم، أو أقفله فتردّ على كل بريد.</h2>
+      <p class="fx"
+        data-en="MATN refuses both. The theme declares what every slot accepts. The client fills the slots on the page itself. &lt;span class='mark'&gt;Content is theirs. Design is yours.&lt;/span&gt;"
+        data-ar="مَتن يرفض الخيارين. تعلن السمة ما يقبله كل موضع، ويملأ العميل المواضع على الصفحة ذاتها. &lt;span class='mark'&gt;المحتوى لهم. والتصميم لك.&lt;/span&gt;">مَتن يرفض الخيارين. تعلن السمة ما يقبله كل موضع، ويملأ العميل المواضع على الصفحة ذاتها. <span class="mark">المحتوى لهم. والتصميم لك.</span></p>
+    </div>
+  </section>
+
+  <!-- SCROLLTELLING: three steps, pinned stage -->
+  <section class="how" id="how">
+    <div class="wrap">
+      <div class="how-head">
+        <h2 class="h-xl fx" data-en="The whole workflow, in one scroll" data-ar="سير العمل كله، في تمريرة واحدة">سير العمل كله، في تمريرة واحدة</h2>
+      </div>
+      <div class="how-g">
+        <div class="steps" id="steps">
+          <div class="step on">
+            <span class="n">01</span>
+            <h3 data-en="Open the page" data-ar="افتح الصفحة">افتح الصفحة</h3>
+            <p data-en="The panel shows the site's own page, not a form that resembles it. Everything editable carries a quiet outline." data-ar="تعرض اللوحة صفحة الموقع نفسها، لا نموذجًا يشبهها. وكل ما يقبل التحرير يحمل إطارًا هادئًا.">تعرض اللوحة صفحة الموقع نفسها، لا نموذجًا يشبهها. وكل ما يقبل التحرير يحمل إطارًا هادئًا.</p>
+          </div>
+          <div class="step">
+            <span class="n">02</span>
+            <h3 data-en="Click and type" data-ar="انقر واكتب">انقر واكتب</h3>
+            <p data-en="The headline is edited in place, in the exact type and size the reader will see. No preview pane, no second window." data-ar="يُحرَّر العنوان في موضعه، بالخط والمقاس اللذين سيراهما القارئ. لا نافذة معاينة، ولا شاشة ثانية.">يُحرَّر العنوان في موضعه، بالخط والمقاس اللذين سيراهما القارئ. لا نافذة معاينة، ولا شاشة ثانية.</p>
+          </div>
+          <div class="step">
+            <span class="n">03</span>
+            <h3 data-en="Click away. Saved." data-ar="انقر خارجه. حُفظ.">انقر خارجه. حُفظ.</h3>
+            <p data-en="One click outside the text saves the change. The design ships exactly as you delivered it, every single time." data-ar="نقرة واحدة خارج النص تحفظ التغيير. ويصل التصميم كما سلّمته أنت، في كل مرة.">نقرة واحدة خارج النص تحفظ التغيير. ويصل التصميم كما سلّمته أنت، في كل مرة.</p>
+          </div>
+        </div>
+
+        <div class="how-vis">
+          <div class="how-vis-in">
+            <div class="proof stage" id="stage" data-s="0">
+              <div class="proof-bar">
+                <i></i><i></i><i></i>
+                <code>alqahera-times.com/news/harvest-figures</code>
+                <span class="savedchip" data-en="Saved" data-ar="تم الحفظ">تم الحفظ</span>
+              </div>
+              <div class="proof-body">
+                <p class="kick" data-en="Economy" data-ar="اقتصاد">اقتصاد</p>
+                <h3><span class="region-sim rs-head" id="stage-head"
+                  data-base-ar="أرقام الحصاد تتجاوز توقعات الوزارة"
+                  data-base-en="Harvest figures pass ministry forecasts"
+                  data-edit-ar="الحصاد يسجّل أعلى رقم في عشر سنوات"
+                  data-edit-en="Harvest sets a ten-year record">أرقام الحصاد تتجاوز توقعات الوزارة</span><span class="caret"></span></h3>
+                <p class="sf"><span class="region-sim"
+                  data-en="Wheat deliveries reached four million tonnes by the close of the season."
+                  data-ar="بلغت توريدات القمح أربعة ملايين طن مع إغلاق الموسم.">بلغت توريدات القمح أربعة ملايين طن مع إغلاق الموسم.</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENTO: six claims, exact count, varied ground -->
+  <section class="why">
+    <div class="wrap">
+      <div class="why-head">
+        <h2 class="h-xl fx" data-en="Built for a newsroom, not a brochure" data-ar="بُني لغرفة أخبار، لا لكتيّب تعريفي">بُني لغرفة أخبار، لا لكتيّب تعريفي</h2>
+        <p class="lede fx" data-en="Every claim below is implemented and covered by tests. None of it is a roadmap." data-ar="كل ما يلي منفَّذ ومغطًّى بالاختبارات. ولا شيء منه وعود على خارطة طريق.">كل ما يلي منفَّذ ومغطًّى بالاختبارات. ولا شيء منه وعود على خارطة طريق.</p>
+      </div>
+      <div class="bento">
+        <div class="cell cell-red cell-w fx">
+          <span class="big" data-en="Nothing runs on a schedule" data-ar="لا شيء يعمل بجدولة">لا شيء يعمل بجدولة</span>
+          <p data-en="Publication state is derived from the clock at query time. A story set for 18:00 is live at 18:00. No cron, no queue, nothing to forget. The commonest WordPress failure cannot happen here." data-ar="تُشتق حالة النشر من الساعة لحظة الاستعلام. الخبر المضبوط على السادسة يُنشر في السادسة. لا مهام مجدولة، ولا طوابير، ولا شيء يُنسى. أشهر أعطال ووردبريس لا يقع هنا.">تُشتق حالة النشر من الساعة لحظة الاستعلام. الخبر المضبوط على السادسة يُنشر في السادسة. لا مهام مجدولة، ولا طوابير، ولا شيء يُنسى. أشهر أعطال ووردبريس لا يقع هنا.</p>
+        </div>
+        <div class="cell fx">
+          <h3 data-en="One story, two headlines" data-ar="خبر واحد، عنوانان">خبر واحد، عنوانان</h3>
+          <p data-en="A front-page slot carries its own headline, summary and image. The front page says what it needs; the article keeps what the writer wrote." data-ar="يحمل موضع الصفحة الأولى عنوانه وملخّصه وصورته. تقول الصفحة الأولى ما تحتاجه، ويحتفظ المقال بما كتبه الصحفي.">يحمل موضع الصفحة الأولى عنوانه وملخّصه وصورته. تقول الصفحة الأولى ما تحتاجه، ويحتفظ المقال بما كتبه الصحفي.</p>
+        </div>
+        <div class="cell fx">
+          <h3 data-en="A new content type, no code" data-ar="نوع محتوى جديد، بلا كود">نوع محتوى جديد، بلا كود</h3>
+          <p data-en="Define fields, validation and a route in the panel; screens, forms and public pages exist on the next request. The panel writes a PHP definition file, so structure is reviewed like code." data-ar="عرِّف الحقول والتحقق والمسار من اللوحة، فتوجد الشاشات والنماذج والصفحات مع الطلب التالي. تكتب اللوحة ملف تعريف PHP، فتُراجَع البنية كما يُراجَع الكود.">عرِّف الحقول والتحقق والمسار من اللوحة، فتوجد الشاشات والنماذج والصفحات مع الطلب التالي. تكتب اللوحة ملف تعريف PHP، فتُراجَع البنية كما يُراجَع الكود.</p>
+        </div>
+        <div class="cell cell-ink cell-w fx">
+          <h3 data-en="Which paragraph changed, and put that one back" data-ar="أي فقرة تغيّرت، وأعد تلك وحدها">أي فقرة تغيّرت، وأعد تلك وحدها</h3>
+          <p data-en="Bodies are stored as keyed paragraphs, not one string. Changes are marked on the real page: changed, new, moved, and a ghost where a deleted one stood. Restore a single paragraph and leave the rest of the afternoon's work alone. Every other CMS offers you two walls of text." data-ar="تُخزَّن المتون فقراتٍ لكل منها مفتاح، لا نصًّا واحدًا. وتُعلَّم التغييرات على الصفحة الحقيقية: متغيّرة، جديدة، منقولة، وطيفٌ مكان المحذوفة. أعد فقرة واحدة واترك بقية عمل اليوم كما هو. كل نظام آخر يعرض عليك جدارين من النص.">تُخزَّن المتون فقراتٍ لكل منها مفتاح، لا نصًّا واحدًا. وتُعلَّم التغييرات على الصفحة الحقيقية: متغيّرة، جديدة، منقولة، وطيفٌ مكان المحذوفة. أعد فقرة واحدة واترك بقية عمل اليوم كما هو. كل نظام آخر يعرض عليك جدارين من النص.</p>
+        </div>
+        <div class="cell fx">
+          <h3 data-en="Checks a subeditor would say" data-ar="فحوص يقولها مراجع لغوي">فحوص يقولها مراجع لغوي</h3>
+          <p data-en="Every editorial check names the fix in plain words, and nothing blocks a save at two in the morning. Word counts are Unicode-aware, so an Arabic story counts correctly." data-ar="كل فحص تحريري يسمّي الإصلاح بكلمات واضحة، ولا شيء يعطّل الحفظ في الثانية فجرًا. وعدّ الكلمات يفهم يونيكود، فالنص العربي يُعَدّ صحيحًا.">كل فحص تحريري يسمّي الإصلاح بكلمات واضحة، ولا شيء يعطّل الحفظ في الثانية فجرًا. وعدّ الكلمات يفهم يونيكود، فالنص العربي يُعَدّ صحيحًا.</p>
+        </div>
+        <div class="cell fx">
+          <h3 data-en="Analytics that store no one" data-ar="تحليلات لا تخزّن أحدًا">تحليلات لا تخزّن أحدًا</h3>
+          <p data-en="Real reader timings from real phones, first-party, about a kilobyte, no cookie. Nothing identifying is ever written down." data-ar="أزمنة تحميل حقيقية من هواتف القرّاء أنفسهم، من الطرف الأول، نحو كيلوبايت، بلا كوكيز. ولا يُدوَّن قط ما يعرّف أحدًا.">أزمنة تحميل حقيقية من هواتف القرّاء أنفسهم، من الطرف الأول، نحو كيلوبايت، بلا كوكيز. ولا يُدوَّن قط ما يعرّف أحدًا.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOUNDATIONS: three pillars -->
+  <section class="base">
+    <div class="wrap">
+      <h2 class="h-xl fx" data-en="The unglamorous half" data-ar="النصف غير اللامع">النصف غير اللامع</h2>
+      <p class="lede fx" data-en="A CMS is judged on the day something goes wrong, not the day it is bought." data-ar="يُحكَم على نظام المحتوى يوم يقع الخطأ، لا يوم الشراء.">يُحكَم على نظام المحتوى يوم يقع الخطأ، لا يوم الشراء.</p>
+      <div class="base-g">
+        <div class="pillar fx">
+          <h3 data-en="Foundation" data-ar="الأساس">الأساس</h3>
+          <ul>
+            <li><span class="mono">CakePHP 5.1 · PHP 8.1+ · MySQL 8</span></li>
+            <li data-en="&lt;b&gt;One row per story.&lt;/b&gt; Hot columns indexed, the rest one JSON column. No meta-table joins." data-ar="&lt;b&gt;صف واحد لكل خبر.&lt;/b&gt; الأعمدة النشطة مفهرسة، والباقي عمود JSON واحد. بلا ضمّ جداول وصفية."><b>صف واحد لكل خبر.</b> الأعمدة النشطة مفهرسة، والباقي عمود JSON واحد. بلا ضمّ جداول وصفية.</li>
+            <li data-en="Pages live in the database. No URL ever carries a .html extension." data-ar="تعيش الصفحات في قاعدة البيانات. ولا يحمل أي رابط امتداد .html إطلاقًا.">تعيش الصفحات في قاعدة البيانات. ولا يحمل أي رابط امتداد .html إطلاقًا.</li>
+          </ul>
+        </div>
+        <div class="pillar fx">
+          <h3 data-en="Language" data-ar="اللغة">اللغة</h3>
+          <ul>
+            <li data-en="&lt;b&gt;The panel speaks Arabic and English&lt;/b&gt;, right-to-left throughout. Not a translation layer bolted on later." data-ar="&lt;b&gt;اللوحة بالعربية والإنجليزية&lt;/b&gt;، ومن اليمين إلى اليسار في كل موضع. لا طبقة ترجمة أُلحقت لاحقًا."><b>اللوحة بالعربية والإنجليزية</b>، ومن اليمين إلى اليسار في كل موضع. لا طبقة ترجمة أُلحقت لاحقًا.</li>
+            <li data-en="Region types are declared by the theme: plain text, rich text, image, link. A heading cannot become a video." data-ar="أنواع المواضع تعلنها السمة: نص عادي، نص منسّق، صورة، رابط. ولا يمكن لعنوان أن يصير مقطعًا.">أنواع المواضع تعلنها السمة: نص عادي، نص منسّق، صورة، رابط. ولا يمكن لعنوان أن يصير مقطعًا.</li>
+          </ul>
+        </div>
+        <div class="pillar fx">
+          <h3 data-en="Safety" data-ar="الأمان">الأمان</h3>
+          <ul>
+            <li data-en="&lt;b&gt;1,500 tests&lt;/b&gt;, PHPCS, and PHPStan at level 8. All three gate CI; a red build is not merged." data-ar="&lt;b&gt;١٥٠٠ اختبار&lt;/b&gt; مع PHPCS و PHPStan في المستوى الثامن. الثلاثة تحرس التكامل المستمر، والبناء الأحمر لا يُدمج."><b>١٥٠٠ اختبار</b> مع PHPCS و PHPStan في المستوى الثامن. الثلاثة تحرس التكامل المستمر، والبناء الأحمر لا يُدمج.</li>
+            <li data-en="A wastebasket instead of destructive deletes, preview links that expire on publish, and a restore that is itself revertable." data-ar="سلة مهملات بدل الحذف النهائي، وروابط معاينة تنتهي مع النشر، واستعادة يمكن التراجع عنها هي نفسها.">سلة مهملات بدل الحذف النهائي، وروابط معاينة تنتهي مع النشر، واستعادة يمكن التراجع عنها هي نفسها.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUTHOR -->
+  <section class="who">
+    <div class="wrap who-g">
+      <div>
+        <h2 class="h-l fx" data-en="Who built it" data-ar="من بناه">من بناه</h2>
+      </div>
+      <div>
+        <p class="fx" data-en="Eslam Abdel Nasser. Seven years building web platforms from Cairo, most of them Arabic-language news, media and fact-checking sites: Quds News Network, Tayaqan, Hodhod, Maktoob Media, Adeni Cast." data-ar="إسلام عبد الناصر. سبع سنوات في بناء منصات الويب من القاهرة، معظمها مواقع أخبار وإعلام وتحقّق بالعربية: شبكة قدس الإخبارية، وتيقّن، والهدهد، ومكتوب ميديا، وعدني كاست.">إسلام عبد الناصر. سبع سنوات في بناء منصات الويب من القاهرة، معظمها مواقع أخبار وإعلام وتحقّق بالعربية: شبكة قدس الإخبارية، وتيقّن، والهدهد، ومكتوب ميديا، وعدني كاست.</p>
+        <p class="fx" data-en="MATN came out of that work. The request was always the same: the client needs to edit the site, and every tool that allowed it destroyed the design in the process." data-ar="من ذلك العمل خرج مَتن. كان الطلب واحدًا دائمًا: يحتاج العميل إلى تحرير موقعه، وكل أداة أتاحت ذلك هدمت التصميم في الطريق.">من ذلك العمل خرج مَتن. كان الطلب واحدًا دائمًا: يحتاج العميل إلى تحرير موقعه، وكل أداة أتاحت ذلك هدمت التصميم في الطريق.</p>
+        <div class="who-links fx">
+          <a class="btn" href="https://www.linkedin.com/in/imsemooo/" data-en="Contact me" data-ar="تواصل معي">تواصل معي</a>
+          <a class="btn" href="https://mostaql.com/u/imsemoo/portfolio" data-en="Previous work" data-ar="أعمال سابقة">أعمال سابقة</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap ft">
+    <span data-en="MATN: the body of a text, the part that carries the meaning." data-ar="مَتن: جسد النص، والجزء الذي يحمل المعنى.">مَتن: جسد النص، والجزء الذي يحمل المعنى.</span>
+    <span data-en="Cairo" data-ar="القاهرة">القاهرة</span>
+  </div>
+</footer>
+
+<!-- Vendored, not CDN: this page must load on networks that block CDN edges. -->
+<script src="assets/gsap.min.js"></script>
+<script src="assets/ScrollTrigger.min.js"></script>
+<script>
+(function () {
+  var REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var html = document.documentElement;
+  var lang = 'ar';
+
+  /* ————— language + direction ————— */
+  var langBtn = document.getElementById('lang');
+  function applyLang(next){
+    lang = next;
+    var ar = lang === 'ar';
+    html.setAttribute('dir', ar ? 'rtl' : 'ltr');
+    html.setAttribute('lang', ar ? 'ar' : 'en');
+    langBtn.textContent = ar ? 'EN' : 'ع';
+    document.querySelectorAll('[data-en][data-ar]').forEach(function(el){
+      // The parser already decoded the attribute's entities, so a value that
+      // carries markup arrives holding a real '<'.
+      var raw = el.getAttribute(ar ? 'data-ar' : 'data-en');
+      if (raw.indexOf('<') !== -1) el.innerHTML = raw;
+      else el.textContent = raw;
+    });
+    document.querySelectorAll('.region[data-hint-ar]').forEach(function(r){
+      r.setAttribute('data-hint', r.getAttribute(ar ? 'data-hint-ar' : 'data-hint-en'));
+    });
+    var sh = document.getElementById('stage-head');
+    var st = document.getElementById('stage');
+    if (sh && st) sh.textContent = sh.getAttribute(
+      (st.getAttribute('data-s') === '0' ? 'data-base-' : 'data-edit-') + (ar ? 'ar' : 'en'));
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
+  }
+  applyLang('ar');
+  langBtn.addEventListener('click', function(){
+    var go = function(){ applyLang(lang === 'ar' ? 'en' : 'ar'); };
+    if (REDUCE || !window.gsap) return go();
+    gsap.to('main', { opacity: 0, duration: .14, onComplete: function(){
+      go(); gsap.to('main', { opacity: 1, duration: .2 });
+    }});
+  });
+
+  /* ————— the hero proof: really editable ————— */
+  var saved = document.getElementById('saved'), t = null;
+  document.querySelectorAll('.region[contenteditable]').forEach(function(r){
+    r.addEventListener('input', function(){
+      saved.classList.add('on');
+      clearTimeout(t); t = setTimeout(function(){ saved.classList.remove('on'); }, 1600);
+    });
+    r.addEventListener('paste', function(e){
+      e.preventDefault();
+      var s = (e.clipboardData || window.clipboardData).getData('text');
+      document.execCommand('insertText', false, s);
+    });
+    r.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') { e.preventDefault(); r.blur(); }
+    });
+  });
+  document.getElementById('try').addEventListener('click', function(){
+    var r = document.getElementById('r1');
+    r.scrollIntoView({ block: 'center', behavior: REDUCE ? 'auto' : 'smooth' });
+    r.focus();
+    var sel = window.getSelection(), rg = document.createRange();
+    rg.selectNodeContents(r); rg.collapse(false);
+    sel.removeAllRanges(); sel.addRange(rg);
+  });
+
+  if (REDUCE || !window.gsap) {
+    // Motion off: show everything, and the stage in its final state.
+    document.querySelectorAll('.fx').forEach(function(el){ el.classList.remove('fx'); });
+    var st = document.getElementById('stage');
+    if (st) setStage(2);
+    return;
+  }
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* ————— hero load: lines rise, proof follows ————— */
+  gsap.set('.rl > span', { opacity: 0, y: 46 });
+  var intro = gsap.timeline({ defaults: { ease: 'power4.out' } });
+  intro.to('.rl > span', { opacity: 1, y: 0, duration: 1, stagger: .12 }, .05)
+       .to('.hero .fx', { opacity: 1, y: 0, duration: .7, stagger: .1 }, '-=.55');
+
+  /* ————— scroll reveals everywhere else ————— */
+  gsap.utils.toArray('section:not(.hero) .fx').forEach(function(el){
+    gsap.to(el, {
+      opacity: 1, y: 0, duration: .8, ease: 'power3.out',
+      scrollTrigger: { trigger: el, start: 'top 86%', once: true }
+    });
+  });
+
+  /* ————— scrolltelling stage ————— */
+  var stage = document.getElementById('stage');
+  var stageHead = document.getElementById('stage-head');
+  var steps = gsap.utils.toArray('#steps .step');
+
+  function setStage(i){
+    stage.setAttribute('data-s', String(i));
+    var ar = lang === 'ar';
+    stageHead.textContent = stageHead.getAttribute((i === 0 ? 'data-base-' : 'data-edit-') + (ar ? 'ar' : 'en'));
+    steps.forEach(function(s, j){ s.classList.toggle('on', j === i); });
+  }
+  window.setStage = setStage;
+
+  ScrollTrigger.matchMedia({
+    '(min-width: 1024px)': function(){
+      steps.forEach(function(s, i){
+        ScrollTrigger.create({
+          trigger: s, start: 'top 55%', end: 'bottom 45%',
+          onToggle: function(self){ if (self.isActive) setStage(i); }
+        });
+      });
+    },
+    '(max-width: 1023px)': function(){
+      // No pinning on mobile: the stage sits above the steps in final state.
+      setStage(2);
+    }
+  });
+})();
+</script>
+</body>
+</html>
